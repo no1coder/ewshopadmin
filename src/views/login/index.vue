@@ -52,18 +52,21 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
 import { PersonOutline, LockClosedOutline} from '@vicons/ionicons5';
-import request from '@/utils/request';
+import { useUserStore } from "@/store/user";
+import { useRouter} from "vue-router";
+
 interface FormState {
   email: string;
   password: string;
 }
+const userStore = useUserStore();
 const loading = ref(false)
 const formInline = reactive({
   username: 'super@a.com',
   password: '123123',
 });
 const formRef = ref();
-
+const router = useRouter();
 const rules = {
   username: { required: true, message: '请输入用户名', trigger: 'blur' },
   password: { required: true, message: '请输入密码', trigger: 'blur' },
@@ -71,8 +74,8 @@ const rules = {
 const handleSubmit = (e:Event)=>{
   e.preventDefault();
   // 表单验证
-  formRef.value.validate(async (error)=>{
-    if(error){
+  formRef.value.validate(async (errors:any) => {
+    if(errors){
       return;
     }
     // 接收数据
@@ -85,10 +88,18 @@ const handleSubmit = (e:Event)=>{
       email:username,
       password,
     }
-    console.log(data)
     // 执行登陆操作
-    request.post('/api/auth/login',data).then((res:any)=>{
+    userStore.login(data).then(res=>{
+      // 关闭登陆中
+      loading.value = false;
+       // 弹出提示 登陆成功
       console.log(res)
+      // router.push({ name: 'dashboard' });
+      window.location.href = '/dashboard';
+    }).catch(err=>{
+
+      loading.value = false;
+      alert('登录失败');
     })
       // 成功后跳转到首页
       // 失败后提示
