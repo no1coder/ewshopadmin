@@ -32,6 +32,12 @@ export const useUserStore = defineStore({
             return this.permissions;
         },
         getUserInfo(): Object {
+            // 判断 this.info 是否是空对象
+            // if(this.info?.id){
+            //     console.log('12312312')
+            // }else{
+            //     console.log('456')
+            // }
             return this.info;
         }
     },
@@ -66,7 +72,6 @@ export const useUserStore = defineStore({
         async getUser(){
             try {
                 const response = await user();
-                console.log(response)
                 this.setUserInfo(response);
                 this.setAvatar(response.avatar);
                 this.setUserName(response.name);

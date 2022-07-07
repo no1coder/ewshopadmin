@@ -12,27 +12,48 @@ export const renderIcon =  (icon:Component) : Component =>{
  * 递归组装菜单格式
  */
 export function generatorMenu(routerMap: Array<any>) {
-    // routerMap 按照 sort 排序
-    routerMap.sort((a, b) => a.meta.sort - b.meta.sort);
+        // routerMap 按照 sort 排序
+        routerMap.sort((a, b) => a.meta.sort - b.meta.sort);
 
-    let result = routerMap.map((item) => {
-        // 判断是否是根路由
-        const isRoot = isRootRouter(item);
-        const info = isRoot ? item.children[0] : item;
-        let menu =  {
-            ...info,
-            label: info.meta.title,
-            key: info.name,
-            icon: info.meta?.icon,
-        }
-        console.log(menu,'menu')
-        if (item.children && item.children.length > 1) {
-            menu.children = generatorMenu(item.children)
-        }
-        return menu;
-
-    })
+        let result = routerMap.map((item) => {
+            let menu = {
+                label: item?.meta?.title,
+                key: item?.name,
+                icon: item.meta?.icon,
+            }
+            if (item.children && item.children.length > 1){
+                menu.children = generatorMenu(item.children)
+            }
+            return menu
+        })
     return result;
+    //   {
+//     label: '首页',
+//     key: 'go-back-home',
+//     icon: renderIcon(HomeIcon)
+//   },
+
+    // routerMap 按照 sort 排序
+    // routerMap.sort((a, b) => a.meta.sort - b.meta.sort);
+    //
+    // let result = routerMap.map((item) => {
+    //     // 判断是否是根路由
+    //     const isRoot = isRootRouter(item);
+    //     const info = isRoot ? item.children[0] : item;
+    //     let menu =  {
+    //         ...info,
+    //         label: info.meta.title,
+    //         key: info.name,
+    //         icon: info.meta?.icon,
+    //     }
+    //     console.log(menu,'menu')
+    //     if (item.children && item.children.length > 1) {
+    //         menu.children = generatorMenu(item.children)
+    //     }
+    //     return menu;
+    //
+    // })
+    // return result;
     // {
     //     label: '且听风吟',
     //         key: 'hear-the-wind-sing',

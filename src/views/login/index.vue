@@ -51,60 +51,76 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useMessage } from 'naive-ui';
 import { PersonOutline, LockClosedOutline} from '@vicons/ionicons5';
+const message = useMessage()
+window.$message = useMessage()
 import { useUserStore } from "@/store/user";
-import { useRouter} from "vue-router";
-
 interface FormState {
   email: string;
   password: string;
 }
+const formRef = ref();
+const loading = ref(false);
 const userStore = useUserStore();
-const loading = ref(false)
 const formInline = reactive({
   username: 'super@a.com',
   password: '123123',
 });
-const formRef = ref();
-const router = useRouter();
 const rules = {
   username: { required: true, message: '请输入用户名', trigger: 'blur' },
   password: { required: true, message: '请输入密码', trigger: 'blur' },
 };
-const handleSubmit = (e:Event)=>{
-  e.preventDefault();
-  // 表单验证
+const router = useRouter();
+const handleSubmit = (e:Event) => {
+  // e.preventDefault();
   formRef.value.validate(async (errors:any) => {
-    if(errors){
-      return;
-    }
-    // 接收数据
-    const {username,password} = formInline;
 
-    // 显示登陆中
-    loading.value = true;
-    // 调整数据结构
-    const data: FormState = {
-      email:username,
-      password,
-    }
-    // 执行登陆操作
-    userStore.login(data).then(res=>{
-      // 关闭登陆中
-      loading.value = false;
-       // 弹出提示 登陆成功
-      console.log(res)
-      // router.push({ name: 'dashboard' });
-      window.location.href = '/dashboard';
-    }).catch(err=>{
+    if (!errors) {
+      const { username, password } = formInline;
+      // message.loading('登录中...');
+      loading.value = true;
 
-      loading.value = false;
-      alert('登录失败');
-    })
-      // 成功后跳转到首页
-      // 失败后提示
+      const params: FormState = {
+        email: username,
+        password,
+      };
+      console.log(params)
+
+      try {
+        // 执行登陆操作
+        const response = userStore.login(params).then(res => {
+          console.log(res)
+          message.success('登录成功')
+          loading.value = false;
+          router.push({ name: 'dashboard' });
+        }).catch(err => {
+          console.log(err)
+          // message.error(err.message);
+          loading.value = false;
+        });
+
+
+        // const { code, message: msg } = await userStore.login(params);
+        // message.destroyAll();
+        // if (code == ResultEnum.SUCCESS) {
+        //   const toPath = decodeURIComponent((route.query?.redirect || '/') as string);
+        //   message.success('登录成功，即将进入系统');
+        //   if (route.name === LOGIN_NAME) {
+        //     router.replace('/');
+        //   } else router.replace(toPath);
+        // } else {
+        //   message.info(msg || '登录失败');
+        // }
+      } finally {
+        loading.value = false;
+      }
+    } else {
+      // message.error('请填写完整信息，并且进行验证码校验');
+    }
   });
-}
+};
 </script>
 
 <style lang="less" scoped>
