@@ -6,10 +6,10 @@
         <n-avatar
             round
             size="small"
-            src="https://api.shop.eduwork.cn/image/avatar.png"
+            :src="userStore.getAvatar"
         />
         <span class="pl-2">
-                        超级管理员
+                        {{userStore.getUserName}}
                       </span>
       </div>
     </n-dropdown>
@@ -24,8 +24,7 @@ import {
   LogOutOutline as LogoutIcon
 } from '@vicons/ionicons5'
 import {useUserStore} from '@/store/user';
-// const userStore = useUserStore()
-// userStore.value.getUserInfo()
+const userStore = useUserStore()
 
 const options = ref([
   {

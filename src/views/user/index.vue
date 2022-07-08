@@ -25,14 +25,20 @@
             </n-form-item>
 
             <n-form-item class="ml-auto">
-              <n-button attr-type="button" @click="">
+              <n-button class="mr-4" attr-type="button" @click="searchReload">
+                重置
+              </n-button>
+              <n-button type="info" attr-type="button" @click="searchSubmit">
                 搜索
               </n-button>
             </n-form-item>
           </n-form>
         </div>
         <div class="mt-4 bg-white">
-          <div class="text-xl pl-4 py-4">用户列表</div>
+          <div class="text-xl px-6 py-4 flex ">
+            <span>用户列表</span>
+            <span class="ml-auto"><NButton type="info" @click="showModal = true" >+ 新建</NButton></span>
+          </div>
           <div>
 
             <n-data-table
@@ -42,78 +48,115 @@
                 :bordered="false"
             />
             <div class="p-4 flex justify-end pr-10">
-              <n-pagination v-model:page="page" :page-count="100" />
+              <n-pagination v-model:page="page" @update:page="updatePage" :page-count="totalPages" />
             </div>
           </div>
         </div>
+        <AddUser :showModal="showModal" @checkShowModal="checkShowModal"></AddUser>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h,ref } from 'vue'
-import { NButton, useMessage } from 'naive-ui'
-import type { DataTableColumns } from 'naive-ui'
+import { h,ref,onMounted } from 'vue'
+import { NButton, useMessage,NAvatar,NSwitch } from 'naive-ui'
+import AddUser from './components/AddUser.vue'
+import { users } from '@/api/users'
 const page = ref(1)
-type Song = {
-  no: number
-  title: string
-  length: string
-}
 const message = useMessage()
-
-const createColumns = ({
-                         play
-                       }: {
-  play: (row: Song) => void
-}): DataTableColumns<Song> => {
-  return [
-    {
-      title: 'No',
-      key: 'no'
-    },
-    {
-      title: 'Title',
-      key: 'title'
-    },
-    {
-      title: 'Length',
-      key: 'length'
-    },
-    {
-      title: 'Action',
-      key: 'actions',
-      render (row) {
-        return h(
-            NButton,
-            {
-              strong: true,
-              tertiary: true,
-              size: 'small',
-              onClick: () => play(row)
-            },
-            { default: () => 'Play' }
-        )
-      }
+const data = ref([])
+const totalPages = ref(0)
+const columns = [
+  {
+    title: '头像',
+    key: 'avatar_url',
+    render (row) {
+      return h(NAvatar,{round:true,src:row.avatar_url,size:'medium'})
     }
-  ]
-}
-
-const data: Song[] = [
-  { no: 3, title: 'Wonderwall', length: '4:18' },
-  { no: 4, title: "Don't Look Back in Anger", length: '4:48' },
-  { no: 12, title: 'Champagne Supernova', length: '7:27' }
+  },
+  {
+    title: '姓名',
+    key: 'name'
+  },
+  {
+    title: '邮箱',
+    key: 'email'
+  },
+  {
+    title: '是否禁用',
+    key: 'is_locked',
+    render(row){
+      return h(NSwitch,{
+        size:'medium',
+        color:'#1890ff',
+        activeColor:'#52c41a',
+        inactiveColor:'#d9d9d9',
+        activeValue:1,
+        inactiveValue:0,
+        value:row.is_locked == 1 ? false : true,
+      })
+    }
+  },
+  {
+    title: '创建时间',
+    key: 'created_at',
+  },
+  {
+    title: '操作',
+    key: 'created_at',
+    render(row){
+      return h(NButton,{
+        size:'small',
+        color:'#1890ff',
+        strong:true,
+        onClick:()=>{
+            message.info('正在编辑'+row.name)
+        }
+      },'编辑')
+    }}
 ]
-const columns = createColumns({
-  play (row: Song) {
-    message.info(`Play ${row.title}`)
-  }
-})
 const pagination = ref(false as const)
 const formSearch = ref({
   name:'',
   email:''
 })
+const showModal = ref(false)
+onMounted(()=>{
+  getUserList({})
+})
+const updatePage = (pageNum) => {
+  getUserList({
+    current:pageNum,
+    name:formSearch.value.name,
+    email:formSearch.value.email
+  })
+}
+const searchSubmit = (e) =>{
+  e.preventDefault()
+  getUserList({
+    name:formSearch.value.name,
+    email:formSearch.value.email,
+    current:1
+  })
+}
+const searchReload = ()=>{
+  getUserList({})
+  formSearch.value = {
+    name:'',
+    email:''
+  }
+}
+const getUserList = (params) =>{
+  users(params).then(users =>{
+    data.value = users.data
+    totalPages.value = users.meta.pagination.total_pages
+    page.value = users.meta.pagination.current_page
+  })
+}
+const checkShowModal = (status)=>{
+  showModal.value = status
+}
+
 </script>
 
 <style scoped>

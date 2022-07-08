@@ -31,13 +31,11 @@ export const useUserStore = defineStore({
         getPermissions(): string[] {
             return this.permissions;
         },
-        getUserInfo(): Object {
+        async getUserInfo(): Object {
             // 判断 this.info 是否是空对象
-            // if(this.info?.id){
-            //     console.log('12312312')
-            // }else{
-            //     console.log('456')
-            // }
+            if(!this.info?.id) {
+                this.getUser();
+            }
             return this.info;
         }
     },
@@ -70,12 +68,13 @@ export const useUserStore = defineStore({
             }
         },
         async getUser(){
+            console.log('getUser')
             try {
                 const response = await user();
                 this.setUserInfo(response);
                 this.setAvatar(response.avatar);
                 this.setUserName(response.name);
-
+                return response;
             } catch (error) {
                 console.log(error);
             }
