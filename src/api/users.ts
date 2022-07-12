@@ -23,5 +23,22 @@ export  function addUser(data) {
             data,
         }
     );
+}
 
+export  function getUserInfo(userid) {
+    return request(
+        {
+            url: `/api/admin/users/${userid}`,
+            method: 'GET',
+        }
+    );
+}
+export  function updateUser(userid, data) {
+    return request(
+        {
+            url: `/api/admin/users/${userid}`,
+            method: 'PUT',
+            data
+        }
+    );
 }

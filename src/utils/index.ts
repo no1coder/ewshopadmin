@@ -14,8 +14,8 @@ export const renderIcon =  (icon:Component) : Component =>{
 export function generatorMenu(routerMap: Array<any>) {
         // routerMap 按照 sort 排序
         routerMap.sort((a, b) => a.meta.sort - b.meta.sort);
-
         let result = routerMap.map((item) => {
+            // 判断 item.name 是否在 permissions 中 如果不存在跳过
             let menu = {
                 label: item?.meta?.title,
                 key: item?.name,
@@ -23,10 +23,13 @@ export function generatorMenu(routerMap: Array<any>) {
             }
             if (item.children && item.children.length > 1){
                 menu.children = generatorMenu(item.children)
+            }else if (item.children && item.children.length === 1){
+                menu.key = item?.children[0].name
             }
             return menu
         })
-    return result;
+    // 去除result null
+    return result
     //   {
 //     label: '首页',
 //     key: 'go-back-home',

@@ -13,7 +13,7 @@ Object.keys(modules).forEach((key) => {
 const routes = [
     {
         path: '/',
-        component: Home
+        redirect:'/dashboard/console'
     },
     {
         path: '/login',

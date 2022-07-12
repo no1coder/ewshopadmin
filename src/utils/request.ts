@@ -47,7 +47,10 @@ request.interceptors.response.use((response) => {
             window.$message.error('网络异常')
             break;
             case 422:
-                window.$message.error('参数错误')
+                console.log(response)
+                let msg = response.data.errors[Object.keys(response.data.errors)[0]][0]
+                window.$message.error(msg)
+                // window.$message.error('邮箱 已经存在')
             break;
     }
 

@@ -25,7 +25,7 @@ import {
 } from '@vicons/ionicons5'
 import {useUserStore} from '@/store/user';
 const userStore = useUserStore()
-
+userStore.getUserInfo
 const options = ref([
   {
     label: '退出登录',

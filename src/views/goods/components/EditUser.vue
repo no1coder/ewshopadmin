@@ -6,7 +6,7 @@
   >
     <n-card
         style="width: 600px"
-        title="添加用户"
+        title="编辑用户"
         :bordered="false"
         size="huge"
         role="dialog"
@@ -15,7 +15,7 @@
       <template #header-extra>
         <span @click="$emit('checkShowModal',false)">X</span>
       </template>
-      <n-form  ref="formRef" :model="model" :rules="rules">
+      <n-form v-if="showForm"  ref="formRef" :model="model" :rules="rules">
         <n-form-item path="name" label="姓名">
           <n-input v-model:value="model.name" placeholder="请输入姓名" />
         </n-form-item>
@@ -26,16 +26,6 @@
               placeholder="请输入邮箱"
           />
         </n-form-item>
-        <n-form-item
-            path="password"
-            label="密码"
-        >
-          <n-input
-              v-model:value="model.password"
-              type="password"
-              placeholder="请输入密码"
-          />
-        </n-form-item>
         <n-row :gutter="[0, 24]">
           <n-col :span="24">
             <div style="display: flex; justify-content: flex-end">
@@ -44,32 +34,47 @@
                   type="primary"
                   @click="userSubmit"
               >
-                添加
+                提交
               </n-button>
             </div>
           </n-col>
         </n-row>
       </n-form>
+      <n-skeleton v-else text :repeat="2" />
     </n-card>
   </n-modal>
 </template>
 
 <script setup>
-import { h, ref,defineProps,defineEmits } from 'vue'
-import {addUser} from "@/api/users";
+import { h, ref,defineProps,defineEmits,onMounted } from 'vue'
+import {addUser,getUserInfo,updateUser} from "@/api/users";
 const props =  defineProps({
   showModal: {
     type: Boolean,
     default: false
+  },
+  user_id:{
+    type: Number,
+    default: ''
   }
 })
-const emit = defineEmits(['checkShowModal','shuaxin'])
-
 const model = ref({
   name: null,
   email: null,
-  password: null
 })
+const showForm = ref(false)
+const emit = defineEmits(['checkShowModal','shuaxin'])
+onMounted(()=>{
+  console.log(123123)
+  if(props.user_id){
+    getUserInfo(props.user_id).then(res=>{
+      model.value.name = res.name
+      model.value.email = res.email
+      showForm.value = true
+    })
+  }
+})
+
 const rules = {
   name: [
     {
@@ -82,13 +87,7 @@ const rules = {
       required: true,
       message: '请输入邮箱'
     }
-  ],
-  password: [
-    {
-      required: true,
-      message: '请输入密码'
-    }
-  ],
+  ]
 }
 const formRef = ref()
 const userSubmit = (e)=>{
@@ -97,7 +96,8 @@ const userSubmit = (e)=>{
     if(errors){
       console.log(errors)
     }else{
-      addUser(model.value).then(res=>{
+      updateUser(props.user_id,model.value).then(res=>{
+        window.$message.success('修改成功')
         emit('checkShowModal',false)
         emit('reloadTable')
       })

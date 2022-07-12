@@ -18,6 +18,7 @@ export function user(){
         }
     );
 }
+
 export function logout() {
     return request(
         {
